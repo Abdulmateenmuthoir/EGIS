@@ -1,0 +1,71 @@
+{% extends "core/base.html" %}
+
+{% block title %}Create User — EGIS File Manager{% endblock %}
+{% block page_title %}Create New User{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <p class="page-desc">Create a new user account. The generated password will be shown once.</p>
+</div>
+
+<div class="card fade-in">
+    <div class="card-body">
+        {% if generated_password %}
+        <div class="password-display">
+            <div class="password-label"><i class="fas fa-key"></i> Generated Password:</div>
+            <div class="password-value" id="generatedPassword">{{ generated_password }}</div>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="navigator.clipboard.writeText('{{ generated_password }}');this.innerHTML='<i class=\'fas fa-check\'></i> Copied!';" id="copyPasswordBtn">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+        </div>
+        {% endif %}
+
+        <form method="post" class="styled-form" id="userCreateForm">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_first_name" class="form-label">First Name</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                    <div class="field-errors">{% for e in form.first_name.errors %}<span class="error-text">{{ e }}</span>{% endfor %}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="id_last_name" class="form-label">Last Name</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                    <div class="field-errors">{% for e in form.last_name.errors %}<span class="error-text">{{ e }}</span>{% endfor %}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_email" class="form-label">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <div class="field-errors">{% for e in form.email.errors %}<span class="error-text">{{ e }}</span>{% endfor %}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_role" class="form-label">Role</label>
+                    {{ form.role }}
+                </div>
+                <div class="form-group">
+                    <label for="id_password" class="form-label">Password</label>
+                    {{ form.password }}
+                    <span class="field-hint">Auto-generated. You can modify it.</span>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="submitUser">
+                    <i class="fas fa-user-plus"></i> Create User
+                </button>
+                <a href="{% url 'core:user_list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

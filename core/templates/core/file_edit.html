@@ -1,0 +1,125 @@
+{% extends "core/base.html" %}
+
+{% block title %}Edit File — EGIS File Manager{% endblock %}
+{% block page_title %}Edit File: {{ file.file_name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <p class="page-desc">Update the file details below.</p>
+</div>
+
+<div class="card fade-in">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data" class="styled-form" id="fileEditForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_cabinet" class="form-label">Cabinet</label>
+                {{ form.cabinet }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_phase" class="form-label">Phase (optional)</label>
+                {{ form.phase }}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_file_name" class="form-label">File Name</label>
+                    {{ form.file_name }}
+                    {% if form.file_name.errors %}
+                    <div class="field-errors">{% for e in form.file_name.errors %}<span class="error-text">{{ e }}</span>{% endfor %}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="id_file_number" class="form-label">File Number</label>
+                    {{ form.file_number }}
+                    <div id="fileNumberFeedback" class="field-feedback"></div>
+                    {% if form.file_number.errors %}
+                    <div class="field-errors">{% for e in form.file_number.errors %}<span class="error-text">{{ e }}</span>{% endfor %}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_volume" class="form-label">Volume</label>
+                    {{ form.volume }}
+                </div>
+                <div class="form-group">
+                    <label for="id_comment" class="form-label">Comment</label>
+                    {{ form.comment }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_document_image" class="form-label">
+                    <i class="fas fa-image"></i> Document Image
+                </label>
+                {% if file.document_image %}
+                <div class="current-image">
+                    <img src="{{ file.document_image.url }}" alt="Current document" class="thumbnail">
+                    <span class="current-label">Current image</span>
+                </div>
+                {% endif %}
+                {{ form.document_image }}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_status" class="form-label">File Status</label>
+                    {{ form.status }}
+                </div>
+                <div class="form-group" id="customStatusGroup" {% if file.status != 'custom' %}style="display:none;"{% endif %}>
+                    <label for="id_custom_status" class="form-label">Custom Status</label>
+                    {{ form.custom_status }}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="updateFile">
+                    <i class="fas fa-save"></i> Update File
+                </button>
+                <a href="{% url 'core:file_detail' file.pk %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cabinetSelect = document.getElementById('id_cabinet');
+    const phaseSelect = document.getElementById('id_phase');
+    const currentPhase = '{{ file.phase_id|default:"" }}';
+
+    if (cabinetSelect) {
+        cabinetSelect.addEventListener('change', function() {
+            const cabinetId = this.value;
+            phaseSelect.innerHTML = '<option value="">---------</option>';
+            if (cabinetId) {
+                fetch(`/api/phases/?cabinet_id=${cabinetId}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        data.phases.forEach(p => {
+                            const opt = document.createElement('option');
+                            opt.value = p.id;
+                            opt.textContent = p.name;
+                            phaseSelect.appendChild(opt);
+                        });
+                    });
+            }
+        });
+    }
+
+    const statusSelect = document.getElementById('id_status');
+    const customGroup = document.getElementById('customStatusGroup');
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            customGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+        });
+    }
+});
+</script>
+{% endblock %}

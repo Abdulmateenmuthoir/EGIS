@@ -1,0 +1,44 @@
+{% extends "core/base.html" %}
+
+{% block title %}{% if editing %}Edit Cabinet{% else %}Create Cabinet{% endif %} — EGIS File Manager{% endblock %}
+{% block page_title %}{% if editing %}Edit Cabinet: {{ cabinet.name }}{% else %}Create a new Cabinet{% endif %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <p class="page-desc">{% if editing %}Update cabinet details below.{% else %}Carefully create Cabinet, tag and create it accordingly.{% endif %}</p>
+</div>
+
+<div class="card fade-in">
+    <div class="card-body">
+        <form method="post" class="styled-form" id="cabinetForm">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="field-errors">
+                    {% for error in field.errors %}<span class="error-text">{{ error }}</span>{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" required id="confirmCheckbox">
+                    <span class="checkmark"></span>
+                    Confirm that you have entered the correct details
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="submitCabinet">
+                    <i class="fas fa-save"></i> {% if editing %}Update{% else %}Submit{% endif %}
+                </button>
+                <a href="{% url 'core:cabinet_list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

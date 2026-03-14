@@ -1,0 +1,53 @@
+{% extends "core/base.html" %}
+
+{% block title %}Edit User — EGIS File Manager{% endblock %}
+{% block page_title %}Edit User: {{ user_obj.first_name }} {{ user_obj.last_name }}{% endblock %}
+
+{% block content %}
+<div class="card fade-in">
+    <div class="card-body">
+        <form method="post" class="styled-form" id="userEditForm">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_first_name" class="form-label">First Name</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="form-group">
+                    <label for="id_last_name" class="form-label">Last Name</label>
+                    {{ form.last_name }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_email" class="form-label">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <div class="field-errors">{% for e in form.email.errors %}<span class="error-text">{{ e }}</span>{% endfor %}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_role" class="form-label">Role</label>
+                    {{ form.role }}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <div class="toggle-wrapper">
+                        {{ form.is_active }}
+                        <span>{% if user_obj.is_active %}Active{% else %}Inactive{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="updateUser">
+                    <i class="fas fa-save"></i> Update User
+                </button>
+                <a href="{% url 'core:user_list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — EGIS File Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <!-- Left Panel - Branding -->
+        <div class="login-brand">
+            <div class="brand-content">
+                <div class="brand-logo-glow"></div>
+                <img src="{% static 'core/img/egislogo.png' %}" alt="EGIS Logo" class="brand-logo">
+                <h1 class="brand-title">E G I S</h1>
+                <p class="brand-subtitle">File Management Application</p>
+                <div class="brand-decoration">
+                    <div class="decoration-line"></div>
+                    <div class="decoration-dot"></div>
+                    <div class="decoration-line"></div>
+                </div>
+                <p class="brand-tagline">Secure. Efficient. Organized.</p>
+            </div>
+            <div class="brand-bg-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+                <div class="shape shape-4"></div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Form -->
+        <div class="login-form-panel">
+            <div class="login-form-wrapper">
+                <h2 class="login-title">Welcome Back!</h2>
+                <p class="login-subtitle">Sign in to continue.</p>
+
+                {% if messages %}
+                <div class="login-messages">
+                    {% for message in messages %}
+                    <div class="login-alert login-alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="post" class="login-form" id="loginForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_username" class="form-label">
+                            <i class="fas fa-envelope"></i> Email
+                        </label>
+                        {{ form.username }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_password" class="form-label">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <div class="password-wrapper">
+                            {{ form.password }}
+                            <button type="button" class="password-toggle" id="passwordToggle" aria-label="Toggle password visibility">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-login" id="loginButton">
+                        <span>Sign In</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Password toggle
+        const toggleBtn = document.getElementById('passwordToggle');
+        const passwordInput = document.getElementById('id_password');
+        if (toggleBtn && passwordInput) {
+            toggleBtn.addEventListener('click', () => {
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+                toggleBtn.querySelector('i').classList.toggle('fa-eye');
+                toggleBtn.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+    </script>
+</body>
+</html>

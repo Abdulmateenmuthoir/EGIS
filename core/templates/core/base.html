@@ -1,0 +1,166 @@
+{% load static %}
+{% load core_tags %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EGIS File Manager{% endblock %}</title>
+    <meta name="description"
+        content="EGIS File Management System - Role-based document tracking and cabinet management">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-container">
+                <img src="{% static 'core/img/egislogo.png' %}" alt="EGIS Logo" class="logo-img">
+            </div>
+            <h2 class="logo-text">E G I S</h2>
+        </div>
+
+        <div class="user-panel">
+            <div class="user-avatar">
+                {{ request.user.first_name.0 }}{{ request.user.last_name.0 }}
+            </div>
+            <div class="user-info">
+                <span class="user-name">{{ request.user.first_name }} {{ request.user.last_name }}</span>
+                <span class="user-role">{{ request.user.get_role_display }}</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <span class="nav-section-title">MENU</span>
+                <a href="{% url 'core:dashboard' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+                    id="nav-dashboard">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title">FILES</span>
+                <a href="{% url 'core:file_create' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'file_create' %}active{% endif %}"
+                    id="nav-create-file">
+                    <i class="fas fa-file-medical"></i>
+                    <span>Create New File</span>
+                </a>
+                <a href="{% url 'core:file_list' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'file_list' %}active{% endif %}"
+                    id="nav-files">
+                    <i class="fas fa-folder-open"></i>
+                    <span>Files List</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-section-title">CABINETS</span>
+                <a href="{% url 'core:cabinet_create' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'cabinet_create' %}active{% endif %}"
+                    id="nav-create-cabinet">
+                    <i class="fas fa-plus-square"></i>
+                    <span>Create New Cabinet</span>
+                </a>
+                <a href="{% url 'core:cabinet_list' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'cabinet_list' %}active{% endif %}"
+                    id="nav-cabinets">
+                    <i class="fas fa-archive"></i>
+                    <span>Cabinets List</span>
+                </a>
+            </div>
+
+            {% if request.user.is_admin %}
+            <div class="nav-section">
+                <span class="nav-section-title">ADMIN</span>
+                <a href="{% url 'core:user_create' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'user_create' %}active{% endif %}"
+                    id="nav-create-user">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Create User</span>
+                </a>
+                <a href="{% url 'core:user_list' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'user_list' %}active{% endif %}"
+                    id="nav-users">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Manage Users</span>
+                </a>
+            </div>
+            {% endif %}
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{% url 'core:logout' %}" class="nav-link logout-link" id="nav-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sign Out</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+            <div class="topbar-right">
+                <span class="greeting">Hello, {{ request.user.first_name }}!</span>
+            </div>
+        </header>
+
+        <!-- Toast Messages -->
+        {% if messages %}
+        <div class="toast-container" id="toastContainer">
+            {% for message in messages %}
+            <div class="toast toast-{{ message.tags }}" data-auto-dismiss>
+                <div class="toast-icon">
+                    {% if message.tags == 'success' %}
+                    <i class="fas fa-check-circle"></i>
+                    {% elif message.tags == 'error' %}
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% elif message.tags == 'warning' %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% else %}
+                    <i class="fas fa-info-circle"></i>
+                    {% endif %}
+                </div>
+                <span class="toast-message">{{ message }}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Page Content -->
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2026 e-GIS & Urban Development. Built By Pioussoul</p>
+        </footer>
+    </div>
+
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <script src="{% static 'core/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

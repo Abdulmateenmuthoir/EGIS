@@ -1,0 +1,210 @@
+{% extends "core/base.html" %}
+
+{% block title %}Create File — EGIS File Manager{% endblock %}
+{% block page_title %}Create a new File{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <p class="page-desc">Carefully create files according to the details on the physical file.</p>
+</div>
+
+<div class="card fade-in">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data" class="styled-form" id="fileCreateForm">
+            {% csrf_token %}
+
+            <!-- Cabinet -->
+            <div class="form-group">
+                <label for="id_cabinet" class="form-label">Choose Cabinet (Where this file belongs)</label>
+                {{ form.cabinet }}
+                {% if form.cabinet.errors %}
+                <div class="field-errors">{% for e in form.cabinet.errors %}<span class="error-text">{{ e }}</span>{% endfor %}</div>
+                {% endif %}
+            </div>
+
+            <!-- Phase -->
+            <div class="form-group">
+                <label for="id_phase" class="form-label">Choose Phase (optional)</label>
+                {{ form.phase }}
+                <span class="field-hint">Select a cabinet first to load available phases</span>
+            </div>
+
+            <!-- File Name & File Number -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_file_name" class="form-label">File Name</label>
+                    {{ form.file_name }}
+                    {% if form.file_name.errors %}
+                    <div class="field-errors">{% for e in form.file_name.errors %}<span class="error-text">{{ e }}</span>{% endfor %}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="id_file_number" class="form-label">File Number</label>
+                    {{ form.file_number }}
+                    <div id="fileNumberFeedback" class="field-feedback"></div>
+                    <div id="fileNumberSuggestions" class="suggestions-dropdown"></div>
+                    {% if form.file_number.errors %}
+                    <div class="field-errors">{% for e in form.file_number.errors %}<span class="error-text">{{ e }}</span>{% endfor %}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Volume & Comment -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_volume" class="form-label">Volume</label>
+                    {{ form.volume }}
+                </div>
+                <div class="form-group">
+                    <label for="id_comment" class="form-label">Comment</label>
+                    {{ form.comment }}
+                </div>
+            </div>
+
+            <!-- Document Image -->
+            <div class="form-group">
+                <label for="id_document_image" class="form-label">
+                    <i class="fas fa-image"></i> Upload Document Image (optional)
+                </label>
+                {{ form.document_image }}
+                <span class="field-hint">Upload a scanned image or photo of the physical document</span>
+                <div id="imagePreview" class="image-preview"></div>
+            </div>
+
+            <!-- Status -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_status" class="form-label">File Status</label>
+                    {{ form.status }}
+                </div>
+                <div class="form-group" id="customStatusGroup" style="display:none;">
+                    <label for="id_custom_status" class="form-label">Custom Status</label>
+                    {{ form.custom_status }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" required id="confirmCheckboxFile">
+                    <span class="checkmark"></span>
+                    Confirm that you have entered the correct details
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="submitFile">
+                    <i class="fas fa-save"></i> Submit
+                </button>
+                <a href="{% url 'core:file_list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Dynamic phase loading
+    const cabinetSelect = document.getElementById('id_cabinet');
+    const phaseSelect = document.getElementById('id_phase');
+    if (cabinetSelect) {
+        cabinetSelect.addEventListener('change', function() {
+            const cabinetId = this.value;
+            phaseSelect.innerHTML = '<option value="">---------</option>';
+            if (cabinetId) {
+                fetch(`/api/phases/?cabinet_id=${cabinetId}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        data.phases.forEach(p => {
+                            const opt = document.createElement('option');
+                            opt.value = p.id;
+                            opt.textContent = p.name;
+                            phaseSelect.appendChild(opt);
+                        });
+                    });
+            }
+        });
+    }
+
+    // File number suggestions & duplicate check
+    const fileNumberInput = document.getElementById('id_file_number');
+    const feedback = document.getElementById('fileNumberFeedback');
+    const suggestions = document.getElementById('fileNumberSuggestions');
+    let debounceTimer;
+
+    if (fileNumberInput) {
+        fileNumberInput.addEventListener('input', function() {
+            const val = this.value;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                if (val.length >= 2) {
+                    // Get suggestions
+                    fetch(`/api/file-number-suggestions/?q=${encodeURIComponent(val)}`)
+                        .then(r => r.json())
+                        .then(data => {
+                            suggestions.innerHTML = '';
+                            if (data.suggestions.length > 0) {
+                                data.suggestions.forEach(s => {
+                                    const div = document.createElement('div');
+                                    div.className = 'suggestion-item';
+                                    div.textContent = s;
+                                    div.addEventListener('click', () => {
+                                        fileNumberInput.value = s;
+                                        suggestions.innerHTML = '';
+                                        checkDuplicate(s);
+                                    });
+                                    suggestions.appendChild(div);
+                                });
+                            }
+                        });
+                    // Check duplicate
+                    checkDuplicate(val);
+                } else {
+                    suggestions.innerHTML = '';
+                    feedback.innerHTML = '';
+                }
+            }, 300);
+        });
+    }
+
+    function checkDuplicate(number) {
+        fetch(`/api/check-file-number/?number=${encodeURIComponent(number)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.exists) {
+                    feedback.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-circle"></i> File number already exists!</span>';
+                } else {
+                    feedback.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> Available</span>';
+                }
+            });
+    }
+
+    // Custom status toggle
+    const statusSelect = document.getElementById('id_status');
+    const customGroup = document.getElementById('customStatusGroup');
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            customGroup.style.display = this.value === 'custom' ? 'block' : 'none';
+        });
+        if (statusSelect.value === 'custom') customGroup.style.display = 'block';
+    }
+
+    // Image preview
+    const imageInput = document.getElementById('id_document_image');
+    const preview = document.getElementById('imagePreview');
+    if (imageInput) {
+        imageInput.addEventListener('change', function() {
+            preview.innerHTML = '';
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

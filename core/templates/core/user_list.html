@@ -1,0 +1,76 @@
+{% extends "core/base.html" %}
+
+{% block title %}Users — EGIS File Manager{% endblock %}
+{% block page_title %}Manage Users{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="page-desc">Manage system users and their roles</p>
+    </div>
+    <a href="{% url 'core:user_create' %}" class="btn btn-primary" id="createUserBtn">
+        <i class="fas fa-user-plus"></i> Create User
+    </a>
+</div>
+
+<div class="card fade-in">
+    <div class="card-body">
+        {% if users %}
+        <div class="table-responsive">
+            <table class="data-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>S/N</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar-sm">{{ u.first_name.0 }}{{ u.last_name.0 }}</div>
+                                <span>{{ u.first_name }} {{ u.last_name }}</span>
+                            </div>
+                        </td>
+                        <td>{{ u.email }}</td>
+                        <td><span class="badge {% if u.role == 'admin' %}badge-admin{% else %}badge-staff{% endif %}">{{ u.get_role_display }}</span></td>
+                        <td>
+                            {% if u.is_active %}
+                            <span class="badge badge-solved">Active</span>
+                            {% else %}
+                            <span class="badge badge-petition">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ u.date_joined|date:"M d, Y" }}</td>
+                        <td class="actions-cell">
+                            <a href="{% url 'core:user_edit' u.pk %}" class="btn-icon" title="Edit"><i class="fas fa-edit"></i></a>
+                            {% if u.pk != request.user.pk %}
+                            <form method="post" action="{% url 'core:user_toggle_active' u.pk %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-icon {% if u.is_active %}btn-icon-danger{% endif %}" title="{% if u.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                    <i class="fas {% if u.is_active %}fa-user-slash{% else %}fa-user-check{% endif %}"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <p>No users found.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

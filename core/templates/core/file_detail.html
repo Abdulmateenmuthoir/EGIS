@@ -1,0 +1,111 @@
+{% extends "core/base.html" %}
+{% load core_tags %}
+
+{% block title %}{{ file.file_name }} — EGIS File Manager{% endblock %}
+{% block page_title %}File Details{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2 class="detail-title">{{ file.file_name }}</h2>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'core:file_edit' file.pk %}" class="btn btn-primary" id="editFileBtn"><i class="fas fa-edit"></i> Edit File</a>
+        <a href="{% url 'core:file_delete' file.pk %}" class="btn btn-danger" id="deleteFileBtn"><i class="fas fa-trash"></i> Delete</a>
+    </div>
+</div>
+
+<div class="detail-grid">
+    <!-- Main Info -->
+    <div class="card fade-in">
+        <div class="card-header">
+            <h2><i class="fas fa-info-circle"></i> File Information</h2>
+        </div>
+        <div class="card-body">
+            <div class="detail-list">
+                <div class="detail-item">
+                    <span class="detail-label">File Name</span>
+                    <span class="detail-value">{{ file.file_name }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">File Number</span>
+                    <span class="detail-value"><span class="file-number-badge">{{ file.file_number }}</span></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Cabinet</span>
+                    <span class="detail-value">
+                        <a href="{% url 'core:cabinet_detail' file.cabinet.pk %}">{{ file.cabinet.name }}</a>
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Phase</span>
+                    <span class="detail-value">{{ file.phase.name|default:"N/A" }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Volume</span>
+                    <span class="detail-value">{{ file.volume|default:"N/A" }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value"><span class="badge {{ file.status|status_badge_class }}">{{ file.display_status }}</span></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Comment</span>
+                    <span class="detail-value">{{ file.comment|default:"No comment" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit Trail -->
+    <div class="card fade-in">
+        <div class="card-header">
+            <h2><i class="fas fa-history"></i> Audit Trail</h2>
+        </div>
+        <div class="card-body">
+            <div class="audit-timeline">
+                <div class="audit-event">
+                    <div class="audit-icon created">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="audit-details">
+                        <span class="audit-action">Created</span>
+                        <span class="audit-meta">
+                            by <strong>{{ file.created_by|default:"Unknown" }}</strong>
+                            on {{ file.created_at|date:"M d, Y \a\t h:i A" }}
+                        </span>
+                    </div>
+                </div>
+                {% if file.updated_by %}
+                <div class="audit-event">
+                    <div class="audit-icon edited">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="audit-details">
+                        <span class="audit-action">Last Edited</span>
+                        <span class="audit-meta">
+                            by <strong>{{ file.updated_by }}</strong>
+                            on {{ file.updated_at|date:"M d, Y \a\t h:i A" }}
+                        </span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Document Image -->
+{% if file.document_image %}
+<div class="card fade-in">
+    <div class="card-header">
+        <h2><i class="fas fa-image"></i> Document Image</h2>
+    </div>
+    <div class="card-body">
+        <div class="document-image-container">
+            <img src="{{ file.document_image.url }}" alt="Document Image" class="document-image">
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

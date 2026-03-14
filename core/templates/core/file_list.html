@@ -1,0 +1,97 @@
+{% extends "core/base.html" %}
+{% load core_tags %}
+
+{% block title %}Files — EGIS File Manager{% endblock %}
+{% block page_title %}Files List{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="page-desc">Find below the list of all files within the office</p>
+    </div>
+    <a href="{% url 'core:file_create' %}" class="btn btn-primary" id="createFileBtn">
+        <i class="fas fa-plus"></i> New File
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card fade-in">
+    <div class="card-body">
+        <form method="get" class="filter-bar" id="fileFilters">
+            <div class="filter-group">
+                <input type="text" name="q" value="{{ q }}" class="form-input" placeholder="Search files..." id="searchInput">
+            </div>
+            <div class="filter-group">
+                <select name="cabinet" class="form-input" id="filterCabinet">
+                    <option value="">All Cabinets</option>
+                    {% for cab in cabinets %}
+                    <option value="{{ cab.pk }}" {% if selected_cabinet == cab.pk|stringformat:"d" %}selected{% endif %}>{{ cab.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <select name="status" class="form-input" id="filterStatus">
+                    <option value="">All Statuses</option>
+                    <option value="normal" {% if selected_status == "normal" %}selected{% endif %}>Normal</option>
+                    <option value="petition" {% if selected_status == "petition" %}selected{% endif %}>Petition</option>
+                    <option value="petition_in_progress" {% if selected_status == "petition_in_progress" %}selected{% endif %}>Petition in Progress</option>
+                    <option value="petition_solved" {% if selected_status == "petition_solved" %}selected{% endif %}>Petition Solved</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" id="filterBtn">
+                <i class="fas fa-search"></i> Filter
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="card fade-in">
+    <div class="card-body">
+        {% if files %}
+        <div class="table-responsive">
+            <table class="data-table" id="filesTable">
+                <thead>
+                    <tr>
+                        <th>S/N</th>
+                        <th>File Name</th>
+                        <th>File Number</th>
+                        <th>Volume</th>
+                        <th>Cabinet</th>
+                        <th>Phase</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in files %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a href="{% url 'core:file_detail' file.pk %}" class="file-link">{{ file.file_name|truncatewords:12 }}</a>
+                        </td>
+                        <td><span class="file-number-badge">{{ file.file_number }}</span></td>
+                        <td>{{ file.volume|default:"—" }}</td>
+                        <td>{{ file.cabinet.name }}</td>
+                        <td>{{ file.phase.name|default:"—" }}</td>
+                        <td><span class="badge {{ file.status|status_badge_class }}">{{ file.display_status }}</span></td>
+                        <td>{{ file.created_at|date:"M d, Y" }}</td>
+                        <td class="actions-cell">
+                            <a href="{% url 'core:file_detail' file.pk %}" class="btn-icon" title="View"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'core:file_edit' file.pk %}" class="btn-icon" title="Edit"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'core:file_delete' file.pk %}" class="btn-icon btn-icon-danger" title="Delete"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-folder-open"></i>
+            <p>No files found. {% if q or selected_cabinet or selected_status %}Try different filters or {% endif %}<a href="{% url 'core:file_create' %}">create a new file</a></p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

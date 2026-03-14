@@ -1,0 +1,35 @@
+{% extends "core/base.html" %}
+
+{% block title %}Delete {{ object_type }} — EGIS File Manager{% endblock %}
+{% block page_title %}Delete {{ object_type }}{% endblock %}
+
+{% block content %}
+<div class="card fade-in">
+    <div class="card-body delete-confirm">
+        <div class="delete-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h2>Are you sure?</h2>
+        <p>You are about to delete the {{ object_type|lower }} <strong>"{{ object }}"</strong>.</p>
+        {% if object_type == 'File' %}
+        <p class="delete-note">This will soft-delete the file. The file number will become available for reuse.</p>
+        {% elif object_type == 'Cabinet' %}
+        <p class="delete-note warning">This will permanently delete the cabinet and all its phases. Files will remain but lose their cabinet association.</p>
+        {% endif %}
+
+        <div class="delete-actions">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" id="confirmDelete">
+                    <i class="fas fa-trash"></i> Yes, Delete
+                </button>
+            </form>
+            {% if cancel_pk %}
+            <a href="{% url cancel_url cancel_pk %}" class="btn btn-secondary">Cancel</a>
+            {% else %}
+            <a href="{% url cancel_url %}" class="btn btn-secondary">Cancel</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
