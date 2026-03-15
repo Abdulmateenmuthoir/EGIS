@@ -59,7 +59,7 @@ class FileForm(forms.ModelForm):
         model = File
         fields = [
             'cabinet', 'phase', 'file_name', 'file_number',
-            'volume', 'comment', 'document_image', 'status', 'custom_status'
+            'document_image', 'status', 'custom_status'
         ]
         widgets = {
             'cabinet': forms.Select(attrs={'class': 'form-input'}),
@@ -73,15 +73,7 @@ class FileForm(forms.ModelForm):
                 'placeholder': 'File Number',
                 'autocomplete': 'off',
             }),
-            'volume': forms.TextInput(attrs={
-                'class': 'form-input',
-                'placeholder': 'Volume',
-            }),
-            'comment': forms.Textarea(attrs={
-                'class': 'form-input',
-                'placeholder': 'Add Comment',
-                'rows': 3,
-            }),
+
             'document_image': forms.ClearableFileInput(attrs={
                 'class': 'form-input file-input',
                 'accept': 'image/*',
@@ -99,8 +91,7 @@ class FileForm(forms.ModelForm):
         self.fields['phase'].queryset = Phase.objects.none()
         self.fields['document_image'].required = False
         self.fields['custom_status'].required = False
-        self.fields['volume'].required = False
-        self.fields['comment'].required = False
+
 
         if 'cabinet' in self.data:
             try:

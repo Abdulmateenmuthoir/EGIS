@@ -81,6 +81,16 @@
                 </a>
             </div>
 
+            <div class="nav-section">
+                <span class="nav-section-title">REPORTS</span>
+                <a href="{% url 'core:reports_page' %}"
+                    class="nav-link {% if request.resolver_match.url_name == 'reports_page' %}active{% endif %}"
+                    id="nav-reports">
+                    <i class="fas fa-file-download"></i>
+                    <span>Generate Reports</span>
+                </a>
+            </div>
+
             {% if request.user.is_admin %}
             <div class="nav-section">
                 <span class="nav-section-title">ADMIN</span>

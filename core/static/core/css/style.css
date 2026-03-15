@@ -1842,8 +1842,76 @@ select.form-input {
     }
 }
 
+/* ─── Dashboard Row (Chart + Table) ────────────────────────── */
+.dashboard-row {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.dashboard-row > .card {
+    min-width: 0;
+}
+
+/* ─── Report Grid ──────────────────────────────────────────── */
+.report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+}
+
+.report-card {
+    text-align: center;
+    transition: var(--transition);
+}
+
+.report-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.report-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 26px;
+    color: white;
+}
+
+.report-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.report-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .dashboard-row {
+        flex-direction: column;
+    }
+
+    .dashboard-row > .card {
+        max-width: 100% !important;
+    }
+}
+
 @media (max-width: 480px) {
     .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .report-grid {
         grid-template-columns: 1fr;
     }
 }

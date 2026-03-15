@@ -55,7 +55,7 @@
                         <th>S/N</th>
                         <th>File Name</th>
                         <th>File Number</th>
-                        <th>Volume</th>
+
                         <th>Cabinet</th>
                         <th>Phase</th>
                         <th>Status</th>
@@ -71,7 +71,7 @@
                             <a href="{% url 'core:file_detail' file.pk %}" class="file-link">{{ file.file_name|truncatewords:12 }}</a>
                         </td>
                         <td><span class="file-number-badge">{{ file.file_number }}</span></td>
-                        <td>{{ file.volume|default:"—" }}</td>
+
                         <td>{{ file.cabinet.name }}</td>
                         <td>{{ file.phase.name|default:"—" }}</td>
                         <td><span class="badge {{ file.status|status_badge_class }}">{{ file.display_status }}</span></td>

@@ -41,18 +41,12 @@
                     <span class="detail-label">Phase</span>
                     <span class="detail-value">{{ file.phase.name|default:"N/A" }}</span>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">Volume</span>
-                    <span class="detail-value">{{ file.volume|default:"N/A" }}</span>
-                </div>
+
                 <div class="detail-item">
                     <span class="detail-label">Status</span>
                     <span class="detail-value"><span class="badge {{ file.status|status_badge_class }}">{{ file.display_status }}</span></span>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">Comment</span>
-                    <span class="detail-value">{{ file.comment|default:"No comment" }}</span>
-                </div>
+
             </div>
         </div>
     </div>

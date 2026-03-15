@@ -44,52 +44,131 @@
     </div>
 </div>
 
-<div class="card fade-in">
-    <div class="card-header">
-        <h2><i class="fas fa-clock"></i> Latest Creations</h2>
+<!-- File Status Chart -->
+<div class="dashboard-row">
+    <div class="card fade-in" style="flex:1; max-width:480px;">
+        <div class="card-header">
+            <h2><i class="fas fa-chart-pie"></i> File Status Breakdown</h2>
+        </div>
+        <div class="card-body" style="display:flex; align-items:center; justify-content:center; padding:24px;">
+            {% if total_files > 0 %}
+            <canvas id="statusChart" style="max-height:320px;"></canvas>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-chart-pie"></i>
+                <p>No files to chart yet. <a href="{% url 'core:file_create' %}">Create your first file</a></p>
+            </div>
+            {% endif %}
+        </div>
     </div>
-    <div class="card-body">
-        {% if latest_files %}
-        <div class="table-responsive">
-            <table class="data-table" id="latestFilesTable">
-                <thead>
-                    <tr>
-                        <th>S/N</th>
-                        <th>File Name</th>
-                        <th>File Number</th>
-                        <th>Cabinet</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for file in latest_files %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>
-                            <a href="{% url 'core:file_detail' file.pk %}" class="file-link">{{ file.file_name }}</a>
-                        </td>
-                        <td><span class="file-number-badge">{{ file.file_number }}</span></td>
-                        <td>{{ file.cabinet.name }}</td>
-                        <td><span class="badge {{ file.status|status_badge_class }}">{{ file.display_status }}</span></td>
-                        <td>{{ file.created_at|date:"M d, Y" }}</td>
-                        <td>
-                            <a href="{% url 'core:file_detail' file.pk %}" class="btn-icon" title="View">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+    <div class="card fade-in" style="flex:1;">
+        <div class="card-header">
+            <h2><i class="fas fa-clock"></i> Latest Creations</h2>
         </div>
-        {% else %}
-        <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <p>No files created yet. <a href="{% url 'core:file_create' %}">Create your first file</a></p>
+        <div class="card-body">
+            {% if latest_files %}
+            <div class="table-responsive">
+                <table class="data-table" id="latestFilesTable">
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>File Name</th>
+                            <th>File Number</th>
+                            <th>Cabinet</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in latest_files %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                <a href="{% url 'core:file_detail' file.pk %}" class="file-link">{{ file.file_name }}</a>
+                            </td>
+                            <td><span class="file-number-badge">{{ file.file_number }}</span></td>
+                            <td>{{ file.cabinet.name }}</td>
+                            <td><span class="badge {{ file.status|status_badge_class }}">{{ file.display_status }}</span></td>
+                            <td>{{ file.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <a href="{% url 'core:file_detail' file.pk %}" class="btn-icon" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No files created yet. <a href="{% url 'core:file_create' %}">Create your first file</a></p>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+{% if total_files > 0 %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    const labels = {{ chart_labels|safe }};
+    const data = {{ chart_data|safe }};
+    const colors = [
+        '#4f46e5', '#f59e0b', '#ef4444', '#10b981', '#8b5cf6',
+        '#ec4899', '#06b6d4', '#64748b'
+    ];
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors.slice(0, labels.length),
+                borderWidth: 0,
+                hoverOffset: 8,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '60%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 16,
+                        usePointStyle: true,
+                        pointStyleWidth: 12,
+                        font: { family: 'Inter', size: 12 }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#1e293b',
+                    titleFont: { family: 'Inter', weight: '600' },
+                    bodyFont: { family: 'Inter' },
+                    padding: 12,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const pct = ((context.raw / total) * 100).toFixed(1);
+                            return ` ${context.label}: ${context.raw} (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
 {% endblock %}

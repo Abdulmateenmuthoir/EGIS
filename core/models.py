@@ -103,8 +103,7 @@ class File(models.Model):
     )
     file_name = models.CharField(max_length=500)
     file_number = models.CharField(max_length=100, unique=True)
-    volume = models.CharField(max_length=50, blank=True, default='')
-    comment = models.TextField(blank=True, default='')
+
     document_image = models.ImageField(
         upload_to='document_images/%Y/%m/', blank=True, null=True
     )

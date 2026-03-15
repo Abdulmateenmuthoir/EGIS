@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from .models import User, Cabinet, Phase, File
 from .forms import (
@@ -42,6 +42,8 @@ def logout_view(request):
 
 
 # ─── Dashboard ──────────────────────────────────────────────────
+STATUS_LABELS = dict(File.STATUS_CHOICES)
+
 @login_required
 def dashboard(request):
     total_files = File.objects.filter(is_deleted=False).count()
@@ -52,12 +54,27 @@ def dashboard(request):
         'cabinet', 'created_by'
     )[:10]
 
+    # File status breakdown for chart
+    status_qs = (
+        File.objects.filter(is_deleted=False)
+        .values('status')
+        .annotate(count=Count('id'))
+        .order_by('status')
+    )
+    chart_labels = []
+    chart_data = []
+    for entry in status_qs:
+        chart_labels.append(STATUS_LABELS.get(entry['status'], entry['status']))
+        chart_data.append(entry['count'])
+
     context = {
         'total_files': total_files,
         'total_cabinets': total_cabinets,
         'total_users': total_users,
         'total_creations': total_creations,
         'latest_files': latest_files,
+        'chart_labels': json.dumps(chart_labels),
+        'chart_data': json.dumps(chart_data),
     }
     return render(request, 'core/dashboard.html', context)
 
@@ -361,3 +378,101 @@ def api_phases(request):
         return JsonResponse({'phases': []})
     phases = Phase.objects.filter(cabinet_id=cabinet_id).values('id', 'name')
     return JsonResponse({'phases': list(phases)})
+
+
+# ─── Reports ───────────────────────────────────────────────────
+@login_required
+def reports_page(request):
+    status_choices = File.STATUS_CHOICES
+    return render(request, 'core/reports.html', {
+        'status_choices': status_choices,
+    })
+
+
+@login_required
+def generate_report(request, report_type):
+    import openpyxl
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from django.http import HttpResponse
+
+    files = File.objects.filter(is_deleted=False).select_related(
+        'cabinet', 'phase', 'created_by'
+    )
+
+    if report_type == 'all_files':
+        title = 'All Files Report'
+        filename = 'EGIS_All_Files_Report.xlsx'
+    else:
+        # Filter by specific status
+        files = files.filter(status=report_type)
+        label = STATUS_LABELS.get(report_type, report_type)
+        title = f'{label} Report'
+        filename = f'EGIS_{report_type}_Report.xlsx'
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Report'
+
+    # Styles
+    header_font = Font(name='Calibri', bold=True, color='FFFFFF', size=12)
+    header_fill = PatternFill(start_color='4F46E5', end_color='4F46E5', fill_type='solid')
+    header_align = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    thin_border = Border(
+        left=Side(style='thin'), right=Side(style='thin'),
+        top=Side(style='thin'), bottom=Side(style='thin'),
+    )
+
+    # Title row
+    ws.merge_cells('A1:G1')
+    title_cell = ws['A1']
+    title_cell.value = title
+    title_cell.font = Font(name='Calibri', bold=True, size=16, color='4F46E5')
+    title_cell.alignment = Alignment(horizontal='center', vertical='center')
+    ws.row_dimensions[1].height = 36
+
+    # Subtitle row
+    ws.merge_cells('A2:G2')
+    sub_cell = ws['A2']
+    sub_cell.value = f'Generated on {timezone.now().strftime("%B %d, %Y at %I:%M %p")}'
+    sub_cell.font = Font(name='Calibri', italic=True, size=10, color='64748B')
+    sub_cell.alignment = Alignment(horizontal='center')
+
+    # Headers
+    headers = ['S/N', 'File Name', 'File Number', 'Cabinet', 'Phase', 'Status', 'Created By', 'Created At']
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=4, column=col_num, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_align
+        cell.border = thin_border
+
+    # Data rows
+    for idx, f in enumerate(files, 1):
+        row_num = idx + 4
+        row_data = [
+            idx,
+            f.file_name,
+            f.file_number,
+            f.cabinet.name if f.cabinet else '',
+            f.phase.name if f.phase else 'N/A',
+            f.display_status,
+            str(f.created_by) if f.created_by else 'Unknown',
+            f.created_at.strftime('%Y-%m-%d %H:%M'),
+        ]
+        for col_num, value in enumerate(row_data, 1):
+            cell = ws.cell(row=row_num, column=col_num, value=value)
+            cell.border = thin_border
+            cell.alignment = Alignment(vertical='center')
+
+    # Auto-width columns
+    col_widths = [6, 40, 18, 20, 14, 22, 20, 18]
+    for i, w in enumerate(col_widths, 1):
+        ws.column_dimensions[chr(64 + i)].width = w
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    wb.save(response)
+    return response
+

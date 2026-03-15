@@ -1,0 +1,50 @@
+{% extends "core/base.html" %}
+
+{% block title %}Generate Reports — EGIS File Manager{% endblock %}
+{% block page_title %}Generate Reports{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="page-desc">Download Excel spreadsheet reports for your files.</p>
+    </div>
+</div>
+
+<div class="report-grid">
+    <!-- All Files Report -->
+    <div class="card fade-in report-card">
+        <div class="card-body" style="text-align:center; padding:32px 24px;">
+            <div class="report-icon" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                <i class="fas fa-file-excel"></i>
+            </div>
+            <h3 class="report-title">All Files Report</h3>
+            <p class="report-desc">Download a full spreadsheet of every file in the system.</p>
+            <a href="{% url 'core:generate_report' 'all_files' %}" class="btn btn-primary" id="downloadAllFiles">
+                <i class="fas fa-download"></i> Download Report
+            </a>
+        </div>
+    </div>
+
+    <!-- Status-specific Reports -->
+    {% for status_code, status_label in status_choices %}
+    <div class="card fade-in report-card">
+        <div class="card-body" style="text-align:center; padding:32px 24px;">
+            <div class="report-icon
+                {% if status_code == 'normal' %}" style="background: linear-gradient(135deg, #4f46e5, #6366f1);">
+                {% elif status_code == 'petition' %}" style="background: linear-gradient(135deg, #f59e0b, #f97316);">
+                {% elif status_code == 'petition_in_progress' %}" style="background: linear-gradient(135deg, #ef4444, #f43f5e);">
+                {% elif status_code == 'petition_solved' %}" style="background: linear-gradient(135deg, #10b981, #059669);">
+                {% else %}" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
+                {% endif %}
+                <i class="fas fa-file-excel"></i>
+            </div>
+            <h3 class="report-title">{{ status_label }} Files</h3>
+            <p class="report-desc">Download a spreadsheet of all files with "{{ status_label }}" status.</p>
+            <a href="{% url 'core:generate_report' status_code %}" class="btn btn-primary" id="download-{{ status_code }}">
+                <i class="fas fa-download"></i> Download Report
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

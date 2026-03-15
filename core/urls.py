@@ -40,4 +40,9 @@ urlpatterns = [
     path('api/file-number-suggestions/', views.api_file_number_suggestions, name='api_file_number_suggestions'),
     path('api/check-file-number/', views.api_check_file_number, name='api_check_file_number'),
     path('api/phases/', views.api_phases, name='api_phases'),
+
+    # Reports
+    path('reports/', views.reports_page, name='reports_page'),
+    path('reports/download/<str:report_type>/', views.generate_report, name='generate_report'),
 ]
+
