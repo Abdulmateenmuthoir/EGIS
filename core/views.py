@@ -438,7 +438,7 @@ def generate_report(request, report_type):
     sub_cell.alignment = Alignment(horizontal='center')
 
     # Headers
-    headers = ['S/N', 'File Name', 'File Number', 'Cabinet', 'Phase', 'Status', 'Created By', 'Created At']
+    headers = ['S/N', 'File Name', 'File Number', 'Case Brief', 'Status', 'Date Invited', 'Created By', 'Created At']
     for col_num, header in enumerate(headers, 1):
         cell = ws.cell(row=4, column=col_num, value=header)
         cell.font = header_font
@@ -449,13 +449,16 @@ def generate_report(request, report_type):
     # Data rows
     for idx, f in enumerate(files, 1):
         row_num = idx + 4
+        date_inv = ''
+        if f.date_invited:
+            date_inv = f.date_invited.strftime('%a %d %B, %Y')
         row_data = [
             idx,
             f.file_name,
             f.file_number,
-            f.cabinet.name if f.cabinet else '',
-            f.phase.name if f.phase else 'N/A',
+            f.case_brief or '',
             f.display_status,
+            date_inv,
             str(f.created_by) if f.created_by else 'Unknown',
             f.created_at.strftime('%Y-%m-%d %H:%M'),
         ]
@@ -465,7 +468,7 @@ def generate_report(request, report_type):
             cell.alignment = Alignment(vertical='center')
 
     # Auto-width columns
-    col_widths = [6, 40, 18, 20, 14, 22, 20, 18]
+    col_widths = [6, 20, 18, 65, 22, 22, 20, 18]
     for i, w in enumerate(col_widths, 1):
         ws.column_dimensions[chr(64 + i)].width = w
 

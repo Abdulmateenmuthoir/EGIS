@@ -49,7 +49,12 @@
                 </div>
             </div>
 
-
+            <!-- Case Brief -->
+            <div class="form-group">
+                <label for="id_case_brief" class="form-label">Case Brief</label>
+                {{ form.case_brief }}
+                <span class="field-hint">A short description of the case</span>
+            </div>
 
             <!-- Document Image -->
             <div class="form-group">
@@ -71,6 +76,13 @@
                     <label for="id_custom_status" class="form-label">Custom Status</label>
                     {{ form.custom_status }}
                 </div>
+            </div>
+
+            <!-- Date Invited (only for Petition in Progress) -->
+            <div class="form-group" id="dateInvitedGroup" style="display:none;">
+                <label for="id_date_invited" class="form-label"><i class="fas fa-calendar-alt"></i> Date Invited</label>
+                {{ form.date_invited }}
+                <span class="field-hint">The date the party is invited to the office</span>
             </div>
 
             <div class="form-group">
@@ -170,14 +182,17 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Custom status toggle
+    // Custom status toggle + Date invited toggle
     const statusSelect = document.getElementById('id_status');
     const customGroup = document.getElementById('customStatusGroup');
+    const dateInvitedGroup = document.getElementById('dateInvitedGroup');
     if (statusSelect) {
-        statusSelect.addEventListener('change', function() {
-            customGroup.style.display = this.value === 'custom' ? 'block' : 'none';
-        });
-        if (statusSelect.value === 'custom') customGroup.style.display = 'block';
+        function toggleStatusFields() {
+            customGroup.style.display = statusSelect.value === 'custom' ? 'block' : 'none';
+            dateInvitedGroup.style.display = statusSelect.value === 'petition_in_progress' ? 'block' : 'none';
+        }
+        statusSelect.addEventListener('change', toggleStatusFields);
+        toggleStatusFields();
     }
 
     // Image preview

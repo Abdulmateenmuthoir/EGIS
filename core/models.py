@@ -103,6 +103,8 @@ class File(models.Model):
     )
     file_name = models.CharField(max_length=500)
     file_number = models.CharField(max_length=100, unique=True)
+    case_brief = models.CharField(max_length=500, blank=True, default='')
+    date_invited = models.DateField(null=True, blank=True)
 
     document_image = models.ImageField(
         upload_to='document_images/%Y/%m/', blank=True, null=True

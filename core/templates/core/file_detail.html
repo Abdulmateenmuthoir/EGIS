@@ -32,6 +32,10 @@
                     <span class="detail-value"><span class="file-number-badge">{{ file.file_number }}</span></span>
                 </div>
                 <div class="detail-item">
+                    <span class="detail-label">Case Brief</span>
+                    <span class="detail-value">{{ file.case_brief|default:"N/A" }}</span>
+                </div>
+                <div class="detail-item">
                     <span class="detail-label">Cabinet</span>
                     <span class="detail-value">
                         <a href="{% url 'core:cabinet_detail' file.cabinet.pk %}">{{ file.cabinet.name }}</a>
@@ -46,6 +50,12 @@
                     <span class="detail-label">Status</span>
                     <span class="detail-value"><span class="badge {{ file.status|status_badge_class }}">{{ file.display_status }}</span></span>
                 </div>
+                {% if file.date_invited %}
+                <div class="detail-item">
+                    <span class="detail-label">Date Invited</span>
+                    <span class="detail-value">{{ file.date_invited|date:"D d F, Y" }}</span>
+                </div>
+                {% endif %}
 
             </div>
         </div>

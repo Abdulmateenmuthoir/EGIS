@@ -58,8 +58,8 @@ class FileForm(forms.ModelForm):
     class Meta:
         model = File
         fields = [
-            'cabinet', 'phase', 'file_name', 'file_number',
-            'document_image', 'status', 'custom_status'
+            'cabinet', 'phase', 'file_name', 'file_number', 'case_brief',
+            'document_image', 'status', 'custom_status', 'date_invited'
         ]
         widgets = {
             'cabinet': forms.Select(attrs={'class': 'form-input'}),
@@ -73,7 +73,14 @@ class FileForm(forms.ModelForm):
                 'placeholder': 'File Number',
                 'autocomplete': 'off',
             }),
-
+            'case_brief': forms.TextInput(attrs={
+                'class': 'form-input',
+                'placeholder': 'Brief description of the case',
+            }),
+            'date_invited': forms.DateInput(attrs={
+                'class': 'form-input',
+                'type': 'date',
+            }),
             'document_image': forms.ClearableFileInput(attrs={
                 'class': 'form-input file-input',
                 'accept': 'image/*',
@@ -91,6 +98,8 @@ class FileForm(forms.ModelForm):
         self.fields['phase'].queryset = Phase.objects.none()
         self.fields['document_image'].required = False
         self.fields['custom_status'].required = False
+        self.fields['case_brief'].required = False
+        self.fields['date_invited'].required = False
 
 
         if 'cabinet' in self.data:
