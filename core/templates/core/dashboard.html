@@ -46,7 +46,7 @@
 
 <!-- File Status Chart -->
 <div class="dashboard-row">
-    <div class="card fade-in" style="flex:1; max-width:480px;">
+    <div class="card fade-in" style="flex:1;">
         <div class="card-header">
             <h2><i class="fas fa-chart-pie"></i> File Status Breakdown</h2>
         </div>
@@ -101,6 +101,33 @@
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Mobile Card Layout -->
+            <div class="mobile-cards">
+                {% for file in latest_files %}
+                <div class="mobile-card">
+                    <div class="mobile-card-header">
+                        <a href="{% url 'core:file_detail' file.pk %}" class="mobile-card-title">{{ file.file_name|truncatewords:6 }}</a>
+                        <span class="badge {{ file.status|status_badge_class }}">{{ file.display_status }}</span>
+                    </div>
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">File No.</span>
+                        <span class="mobile-card-value"><span class="file-number-badge">{{ file.file_number }}</span></span>
+                    </div>
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">Cabinet</span>
+                        <span class="mobile-card-value">{{ file.cabinet.name }}</span>
+                    </div>
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">Date</span>
+                        <span class="mobile-card-value">{{ file.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="mobile-card-actions">
+                        <a href="{% url 'core:file_detail' file.pk %}" class="btn-icon" title="View"><i class="fas fa-eye"></i></a>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
             {% else %}
             <div class="empty-state">

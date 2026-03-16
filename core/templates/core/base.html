@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}?v=4">
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -122,9 +122,12 @@
     <div class="main-wrapper">
         <!-- Top Bar -->
         <header class="topbar">
-            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
-                <i class="fas fa-bars"></i>
-            </button>
+            <div class="topbar-left">
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <img src="{% static 'core/img/egislogo.png' %}" alt="EGIS" class="topbar-logo">
+            </div>
             <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
             <div class="topbar-right">
                 <span class="greeting">Hello, {{ request.user.first_name }}!</span>

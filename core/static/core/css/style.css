@@ -1510,6 +1510,84 @@ select.form-input {
     box-shadow: 0 6px 24px rgba(13, 115, 119, 0.4);
 }
 
+/* ─── Topbar Logo (hidden on desktop, shown on mobile) ──── */
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbar-logo {
+    display: none;
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+
+/* ─── Mobile Card Layout for Tables ─────────────────────── */
+.mobile-cards {
+    display: none;
+}
+
+.mobile-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: var(--transition);
+}
+
+.mobile-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.mobile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.mobile-card-title {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 15px;
+    flex: 1;
+}
+
+.mobile-card-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+.mobile-card-row:last-child {
+    border-bottom: none;
+}
+
+.mobile-card-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.mobile-card-value {
+    color: var(--text-primary);
+    font-weight: 500;
+    text-align: right;
+    max-width: 60%;
+}
+
+.mobile-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
 /* ─── Sidebar Overlay (Mobile) ──────────────────────────────── */
 .sidebar-overlay {
     display: none;
@@ -1537,73 +1615,173 @@ select.form-input {
     .sidebar {
         transform: translateX(-100%);
     }
-
     .sidebar.open {
         transform: translateX(0);
     }
-
     .main-wrapper {
         margin-left: 0;
     }
 
+    /* Topbar mobile */
     .sidebar-toggle {
         display: flex;
     }
+    .topbar-logo {
+        display: block;
+    }
+    .topbar {
+        padding: 0 12px;
+        gap: 8px;
+    }
+    .page-title {
+        font-size: 16px;
+    }
+    .greeting, .topbar-right {
+        display: none;
+    }
 
     .content {
-        padding: 16px;
+        padding: 14px;
     }
 
-    .topbar {
-        padding: 0 16px;
+    /* Page header */
+    .page-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .page-desc {
+        font-size: 13px;
     }
 
+    /* Dashboard stat cards — single column */
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .stat-card {
+        padding: 18px 16px;
+        gap: 14px;
+    }
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        font-size: 20px;
+    }
+    .stat-value {
+        font-size: 24px;
+    }
+    .stat-label {
+        font-size: 12px;
+    }
+
+    /* Dashboard row */
+    .dashboard-row {
+        flex-direction: column;
+    }
+    .dashboard-row > .card {
+        max-width: 100% !important;
+        width: 100%;
+    }
+
+    /* Cards */
+    .card {
+        margin-bottom: 14px;
+    }
+    .card-header {
+        padding: 14px 16px;
+    }
+    .card-header h2 {
+        font-size: 14px;
+    }
+    .card-body {
+        padding: 14px 16px;
+    }
+
+    /* Filter bar */
+    .filter-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .filter-group {
+        min-width: auto;
+        width: 100%;
+    }
+    .filter-group .form-input {
+        width: 100%;
+    }
+    .filter-bar .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Tables → hide, show mobile cards */
+    .table-responsive {
+        display: none;
+    }
+    .mobile-cards {
+        display: block;
+    }
+
+    /* Forms */
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    .form-actions {
+        flex-direction: column;
+    }
+    .form-actions .btn {
+        justify-content: center;
+    }
+
+    /* Login */
     .login-container {
         flex-direction: column;
         min-height: auto;
     }
-
     .login-brand {
         padding: 32px 20px;
         min-height: 200px;
     }
-
     .brand-logo {
         width: 60px;
         height: 60px;
     }
-
     .brand-title {
         font-size: 20px;
     }
-
     .login-form-panel {
         padding: 32px 20px;
     }
 
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .dashboard-stats {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .page-header {
-        flex-direction: column;
-    }
-
-    .filter-bar {
-        flex-direction: column;
-    }
-
+    /* Toasts */
     .toast-container {
         right: 12px;
         left: 12px;
     }
-
     .toast {
         min-width: auto;
+    }
+
+    /* Buttons & badges */
+    .btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+    .badge {
+        font-size: 11px;
+        padding: 3px 10px;
+    }
+
+    /* Delete page */
+    .delete-confirm {
+        padding: 24px 16px;
+    }
+    .delete-actions {
+        flex-direction: column;
+    }
+    .delete-actions .btn {
+        justify-content: center;
     }
 }
 
@@ -1825,22 +2003,7 @@ select.form-input {
     font-weight: 600;
 }
 
-@media (max-width: 768px) {
-    .cabinet-accordion-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-
-    .cabinet-accordion-right {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .phase-file-item {
-        padding-left: 40px;
-    }
-}
+/* cabinet mobile handled in main 768px block above */
 
 /* ─── Dashboard Row (Chart + Table) ────────────────────────── */
 .dashboard-row {
@@ -1896,22 +2059,32 @@ select.form-input {
     line-height: 1.5;
 }
 
-@media (max-width: 768px) {
-    .dashboard-row {
-        flex-direction: column;
-    }
-
-    .dashboard-row > .card {
-        max-width: 100% !important;
-    }
-}
+/* dashboard-row mobile handled in main 768px block above */
 
 @media (max-width: 480px) {
-    .dashboard-stats {
-        grid-template-columns: 1fr;
+    .content {
+        padding: 10px;
     }
-
+    .stat-card {
+        padding: 14px 12px;
+    }
+    .stat-value {
+        font-size: 22px;
+    }
     .report-grid {
         grid-template-columns: 1fr;
+    }
+    .cabinet-accordion-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+    }
+    .cabinet-accordion-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .phase-file-item {
+        padding-left: 40px;
     }
 }

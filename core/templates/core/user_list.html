@@ -65,6 +65,48 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Mobile Card Layout -->
+        <div class="mobile-cards">
+            {% for u in users %}
+            <div class="mobile-card">
+                <div class="mobile-card-header">
+                    <div style="display:flex; align-items:center; gap:10px; flex:1;">
+                        <div class="user-avatar-sm">{{ u.first_name.0 }}{{ u.last_name.0 }}</div>
+                        <span class="mobile-card-title" style="color:var(--text-primary);">{{ u.first_name }} {{ u.last_name }}</span>
+                    </div>
+                    {% if u.is_active %}
+                    <span class="badge badge-solved">Active</span>
+                    {% else %}
+                    <span class="badge badge-petition">Inactive</span>
+                    {% endif %}
+                </div>
+                <div class="mobile-card-row">
+                    <span class="mobile-card-label">Email</span>
+                    <span class="mobile-card-value" style="font-size:12px;">{{ u.email }}</span>
+                </div>
+                <div class="mobile-card-row">
+                    <span class="mobile-card-label">Role</span>
+                    <span class="mobile-card-value"><span class="badge {% if u.role == 'admin' %}badge-admin{% else %}badge-staff{% endif %}">{{ u.get_role_display }}</span></span>
+                </div>
+                <div class="mobile-card-row">
+                    <span class="mobile-card-label">Joined</span>
+                    <span class="mobile-card-value">{{ u.date_joined|date:"M d, Y" }}</span>
+                </div>
+                <div class="mobile-card-actions">
+                    <a href="{% url 'core:user_edit' u.pk %}" class="btn-icon" title="Edit"><i class="fas fa-edit"></i></a>
+                    {% if u.pk != request.user.pk %}
+                    <form method="post" action="{% url 'core:user_toggle_active' u.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-icon {% if u.is_active %}btn-icon-danger{% endif %}" title="{% if u.is_active %}Deactivate{% else %}Activate{% endif %}">
+                            <i class="fas {% if u.is_active %}fa-user-slash{% else %}fa-user-check{% endif %}"></i>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
         {% else %}
         <div class="empty-state">
             <i class="fas fa-users"></i>
