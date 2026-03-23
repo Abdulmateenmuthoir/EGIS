@@ -479,3 +479,173 @@ def generate_report(request, report_type):
     wb.save(response)
     return response
 
+
+@login_required
+def generate_pdf_report(request, report_type):
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.units import mm
+    from reportlab.platypus import (
+        SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer,
+    )
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from django.http import HttpResponse
+    import io
+
+    files = File.objects.filter(is_deleted=False).select_related(
+        'cabinet', 'phase', 'created_by'
+    )
+
+    if report_type == 'all_files':
+        title = 'All Files Report'
+        filename = 'EGIS_All_Files_Report.pdf'
+    else:
+        files = files.filter(status=report_type)
+        label = STATUS_LABELS.get(report_type, report_type)
+        title = f'{label} Report'
+        filename = f'EGIS_{report_type}_Report.pdf'
+
+    # ── Column colors (harmonious palette) ──────────────────
+    col_header_colors = [
+        colors.HexColor('#4F46E5'),   # Indigo   — S/N
+        colors.HexColor('#0D9488'),   # Teal     — File Name
+        colors.HexColor('#D97706'),   # Amber    — File Number
+        colors.HexColor('#7C3AED'),   # Violet   — Case Brief
+        colors.HexColor('#059669'),   # Emerald  — Status
+        colors.HexColor('#0284C7'),   # Sky      — Date Invited
+        colors.HexColor('#E11D48'),   # Rose     — Created By
+        colors.HexColor('#475569'),   # Slate    — Created At
+    ]
+
+    col_light_colors = [
+        colors.HexColor('#EEF2FF'),   # Indigo light
+        colors.HexColor('#F0FDFA'),   # Teal light
+        colors.HexColor('#FFFBEB'),   # Amber light
+        colors.HexColor('#F5F3FF'),   # Violet light
+        colors.HexColor('#ECFDF5'),   # Emerald light
+        colors.HexColor('#F0F9FF'),   # Sky light
+        colors.HexColor('#FFF1F2'),   # Rose light
+        colors.HexColor('#F8FAFC'),   # Slate light
+    ]
+
+    # ── Build PDF ───────────────────────────────────────────
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=landscape(A4),
+        leftMargin=12 * mm,
+        rightMargin=12 * mm,
+        topMargin=15 * mm,
+        bottomMargin=15 * mm,
+    )
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'ReportTitle',
+        parent=styles['Title'],
+        fontSize=18,
+        textColor=colors.HexColor('#4F46E5'),
+        spaceAfter=4,
+    )
+    subtitle_style = ParagraphStyle(
+        'ReportSubtitle',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=colors.HexColor('#64748B'),
+        spaceAfter=14,
+    )
+    cell_style = ParagraphStyle(
+        'CellText',
+        parent=styles['Normal'],
+        fontSize=8,
+        leading=10,
+    )
+    header_style = ParagraphStyle(
+        'HeaderText',
+        parent=styles['Normal'],
+        fontSize=9,
+        leading=11,
+        textColor=colors.white,
+        fontName='Helvetica-Bold',
+    )
+
+    elements = []
+
+    # Title & subtitle
+    elements.append(Paragraph(title, title_style))
+    elements.append(Paragraph(
+        f'Generated on {timezone.now().strftime("%B %d, %Y at %I:%M %p")}',
+        subtitle_style,
+    ))
+
+    # Table headers
+    headers = ['S/N', 'File Name', 'File Number', 'Case Brief', 'Status',
+               'Date Invited', 'Created By', 'Created At']
+    header_row = [Paragraph(h, header_style) for h in headers]
+
+    # Table data
+    data = [header_row]
+    for idx, f in enumerate(files, 1):
+        date_inv = ''
+        if f.date_invited:
+            date_inv = f.date_invited.strftime('%a %d %b, %Y')
+        row = [
+            Paragraph(str(idx), cell_style),
+            Paragraph(str(f.file_name), cell_style),
+            Paragraph(str(f.file_number), cell_style),
+            Paragraph(str(f.case_brief or ''), cell_style),
+            Paragraph(str(f.display_status), cell_style),
+            Paragraph(date_inv, cell_style),
+            Paragraph(str(f.created_by) if f.created_by else 'Unknown', cell_style),
+            Paragraph(f.created_at.strftime('%Y-%m-%d %H:%M'), cell_style),
+        ]
+        data.append(row)
+
+    # Column widths (landscape A4 ≈ 277mm usable)
+    col_widths = [30, 80, 55, 120, 60, 62, 55, 50]
+
+    table = Table(data, colWidths=col_widths, repeatRows=1)
+
+    # ── Table style ─────────────────────────────────────────
+    style_commands = [
+        # Grid
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+    ]
+
+    # Per-column header colors
+    for col_idx, hdr_color in enumerate(col_header_colors):
+        style_commands.append(
+            ('BACKGROUND', (col_idx, 0), (col_idx, 0), hdr_color)
+        )
+
+    # Per-column alternating row colors
+    num_rows = len(data)
+    for row_idx in range(1, num_rows):
+        for col_idx, light_color in enumerate(col_light_colors):
+            if row_idx % 2 == 0:
+                style_commands.append(
+                    ('BACKGROUND', (col_idx, row_idx), (col_idx, row_idx), light_color)
+                )
+            else:
+                style_commands.append(
+                    ('BACKGROUND', (col_idx, row_idx), (col_idx, row_idx), colors.white)
+                )
+
+    table.setStyle(TableStyle(style_commands))
+    elements.append(table)
+
+    doc.build(elements)
+
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type='application/pdf',
+    )
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    buffer.close()
+    return response
+

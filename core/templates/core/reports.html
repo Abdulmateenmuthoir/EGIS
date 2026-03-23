@@ -6,7 +6,7 @@
 {% block content %}
 <div class="page-header">
     <div>
-        <p class="page-desc">Download Excel spreadsheet reports for your files.</p>
+        <p class="page-desc">Download reports in Excel or PDF format.</p>
     </div>
 </div>
 
@@ -15,13 +15,18 @@
     <div class="card fade-in report-card">
         <div class="card-body" style="text-align:center; padding:32px 24px;">
             <div class="report-icon" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
-                <i class="fas fa-file-excel"></i>
+                <i class="fas fa-folder-open"></i>
             </div>
             <h3 class="report-title">All Files Report</h3>
-            <p class="report-desc">Download a full spreadsheet of every file in the system.</p>
-            <a href="{% url 'core:generate_report' 'all_files' %}" class="btn btn-primary" id="downloadAllFiles">
-                <i class="fas fa-download"></i> Download Report
-            </a>
+            <p class="report-desc">Download a full report of every file in the system.</p>
+            <div class="report-btn-group">
+                <a href="{% url 'core:generate_report' 'all_files' %}" class="btn btn-primary" id="downloadAllFilesExcel">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a>
+                <a href="{% url 'core:generate_pdf_report' 'all_files' %}" class="btn btn-pdf" id="downloadAllFilesPdf">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+            </div>
         </div>
     </div>
 
@@ -36,13 +41,18 @@
                 {% elif status_code == 'petition_solved' %}" style="background: linear-gradient(135deg, #10b981, #059669);">
                 {% else %}" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
                 {% endif %}
-                <i class="fas fa-file-excel"></i>
+                <i class="fas fa-chart-bar"></i>
             </div>
             <h3 class="report-title">{{ status_label }} Files</h3>
-            <p class="report-desc">Download a spreadsheet of all files with "{{ status_label }}" status.</p>
-            <a href="{% url 'core:generate_report' status_code %}" class="btn btn-primary" id="download-{{ status_code }}">
-                <i class="fas fa-download"></i> Download Report
-            </a>
+            <p class="report-desc">Download a report of all files with "{{ status_label }}" status.</p>
+            <div class="report-btn-group">
+                <a href="{% url 'core:generate_report' status_code %}" class="btn btn-primary" id="download-{{ status_code }}-excel">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a>
+                <a href="{% url 'core:generate_pdf_report' status_code %}" class="btn btn-pdf" id="download-{{ status_code }}-pdf">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+            </div>
         </div>
     </div>
     {% endfor %}

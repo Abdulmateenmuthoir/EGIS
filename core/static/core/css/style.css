@@ -2059,6 +2059,25 @@ select.form-input {
     line-height: 1.5;
 }
 
+.report-btn-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-pdf {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+}
+
+.btn-pdf:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.35);
+    color: white;
+}
+
 /* dashboard-row mobile handled in main 768px block above */
 
 @media (max-width: 480px) {

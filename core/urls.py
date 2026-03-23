@@ -44,5 +44,6 @@ urlpatterns = [
     # Reports
     path('reports/', views.reports_page, name='reports_page'),
     path('reports/download/<str:report_type>/', views.generate_report, name='generate_report'),
+    path('reports/download-pdf/<str:report_type>/', views.generate_pdf_report, name='generate_pdf_report'),
 ]
 
