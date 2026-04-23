@@ -590,19 +590,24 @@ def generate_pdf_report(request, report_type):
         if f.date_invited:
             date_inv = f.date_invited.strftime('%a %d %b, %Y')
             
-        # Truncate case_brief to prevent LayoutError on very long texts
-        case_brief_text = str(f.case_brief or '')
-        if len(case_brief_text) > 200:
-            case_brief_text = case_brief_text[:197] + '...'
+        # Clean and truncate fields to prevent PDF LayoutErrors from massive text or many newlines
+        def clean_text(text, max_len):
+            if not text: return ''
+            cleaned = str(text).replace('\n', ' ').replace('\r', ' ').strip()
+            # Escape XML characters for ReportLab Paragraph
+            cleaned = cleaned.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            if len(cleaned) > max_len:
+                return cleaned[:max_len-3] + '...'
+            return cleaned
 
         row = [
             Paragraph(str(idx), cell_style),
-            Paragraph(str(f.file_name), cell_style),
-            Paragraph(str(f.file_number), cell_style),
-            Paragraph(case_brief_text, cell_style),
-            Paragraph(str(f.display_status), cell_style),
+            Paragraph(clean_text(f.file_name, 100), cell_style),
+            Paragraph(clean_text(f.file_number, 50), cell_style),
+            Paragraph(clean_text(f.case_brief, 150), cell_style),
+            Paragraph(clean_text(f.display_status, 50), cell_style),
             Paragraph(date_inv, cell_style),
-            Paragraph(str(f.created_by) if f.created_by else 'Unknown', cell_style),
+            Paragraph(clean_text(f.created_by if f.created_by else 'Unknown', 50), cell_style),
             Paragraph(f.created_at.strftime('%Y-%m-%d %H:%M'), cell_style),
         ]
         data.append(row)
