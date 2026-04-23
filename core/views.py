@@ -589,11 +589,17 @@ def generate_pdf_report(request, report_type):
         date_inv = ''
         if f.date_invited:
             date_inv = f.date_invited.strftime('%a %d %b, %Y')
+            
+        # Truncate case_brief to prevent LayoutError on very long texts
+        case_brief_text = str(f.case_brief or '')
+        if len(case_brief_text) > 200:
+            case_brief_text = case_brief_text[:197] + '...'
+
         row = [
             Paragraph(str(idx), cell_style),
             Paragraph(str(f.file_name), cell_style),
             Paragraph(str(f.file_number), cell_style),
-            Paragraph(str(f.case_brief or ''), cell_style),
+            Paragraph(case_brief_text, cell_style),
             Paragraph(str(f.display_status), cell_style),
             Paragraph(date_inv, cell_style),
             Paragraph(str(f.created_by) if f.created_by else 'Unknown', cell_style),
